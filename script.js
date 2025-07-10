@@ -1,4 +1,4 @@
-// קובץ script.js - כולל לוגיקת תיקון ודגשה מלאה
+ // קובץ script.js - כולל לוגיקת תיקון ודגשה מלאה
 // המילונים מגיעים מקובץ dictionaries.js
 // ודא ש dictionaries.js נטען לפני script.js ב-HTML
 
@@ -8,7 +8,7 @@ const outputText = document.getElementById('outputText');
 const hiddenFixedText = document.getElementById('hiddenFixedText');
 const fixButton = document.getElementById('fixButton');
 const copyButton = document.getElementById('copyButton');
-const downloadButton = document('downloadButton');
+const downloadButton = document.getElementById('downloadButton'); // התיקון כאן!
 const clearButton = document.getElementById('clearButton');
 const statusMessage = document.getElementById('statusMessage');
 const summaryOutput = document.getElementById('summaryOutput');
