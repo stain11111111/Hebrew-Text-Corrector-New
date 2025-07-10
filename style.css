@@ -1,0 +1,167 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    direction: rtl;
+}
+
+.container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 700px;
+    text-align: center;
+    direction: rtl;
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 2em;
+}
+
+p {
+    color: #34495e;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+textarea {
+    width: calc(100% - 20px);
+    height: 150px;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    line-height: 1.5;
+    resize: vertical;
+    direction: rtl;
+    text-align: right;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+#hiddenFixedText {
+    display: none;
+}
+
+.output-display {
+    width: calc(100% - 20px);
+    height: 150px;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    text-align: right;
+    overflow-y: auto;
+    direction: rtl;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+/* סגנונות הדגשה */
+.highlight-added {
+    background-color: #d4edda; /* ירוק בהיר */
+    color: #155724; /* ירוק כהה */
+    font-weight: bold;
+    padding: 1px 0px;
+    border-radius: 2px;
+}
+.highlight-removed {
+    background-color: #f8d7da; /* אדום בהיר */
+    color: #721c24; /* אדום כהה */
+    text-decoration: line-through;
+    font-weight: bold;
+    padding: 1px 0px;
+    border-radius: 2px;
+}
+
+.highlight-typo {
+    text-decoration: underline wavy red; /* קו תחתון גלי אדום */
+    font-weight: bold;
+    cursor: help;
+    padding: 1px 0px;
+    border-radius: 2px;
+}
+
+.buttons-container {
+    margin-bottom: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.message {
+    font-weight: bold;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.message.show {
+    opacity: 1;
+}
+
+.message.success { color: #27ae60; }
+.message.error { color: #e74c3c; }
+.message.info { color: #34495e; }
+
+#summaryOutput {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    text-align: right;
+    font-size: 0.95em;
+    color: #34495e;
+}
+
+#summaryOutput ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#summaryOutput li {
+    margin-bottom: 5px;
+}
+
+#trialStatusMessage {
+    color: #555;
+    font-size: 0.9em;
+    margin-top: 5px;
+    min-height: 1.2em; /* כדי למנוע קפיצות תוכן */
+}
