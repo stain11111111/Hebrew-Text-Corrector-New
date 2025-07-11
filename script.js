@@ -11,7 +11,7 @@ const fixButton = document.getElementById('fixButton');
 const copyButton = document.getElementById('copyButton');
 const downloadButton = document.getElementById('downloadButton');
 const clearButton = document.getElementById('clearButton');
-const outputTextDisplay = document.getElementById('outputText'); // נשאר outputText לפי ה-HTML
+const outputTextDisplay = document.getElementById('outputTextDisplay'); // *** תיקון כאן: שינוי ל-outputTextDisplay ***
 const hiddenFixedText = document.getElementById('hiddenFixedText');
 const summaryOutput = document.getElementById('summaryOutput');
 const statusMessage = document.getElementById('statusMessage');
@@ -235,11 +235,12 @@ fixButton.addEventListener('click', () => {
 
     // *** תיקון שגוי: outputTextDisplay אמור להיות outputText לפי ה-HTML ***
     // זה תוקן בתחילת הקובץ, אז כאן זה בסדר
-    outputTextDisplay.innerHTML = '';
+    // הערה: שורת הקוד למטה נראית תקינה כעת, כי outputTextDisplay מוגדר עם ה-ID הנכון למעלה.
+    outputTextDisplay.innerHTML = ''; // מנקה את התצוגה לפני הכנסת טקסט חדש
     hiddenFixedText.value = fixedText;
 
     const { html: highlightedHtml, summary: diffSummary } = generateHighlightedOutput(originalInput, fixedText);
-    outputTextDisplay.innerHTML = highlightedHtml;
+    outputTextDisplay.innerHTML = highlightedHtml; // מציג את הטקסט המתוקן עם הדגשות
 
     summaryOutput.innerHTML = '';
     const ul = document.createElement('ul');
