@@ -1,455 +1,306 @@
-// קובץ script.js - כולל לוגיקת תיקון ודגשה מלאה
+// URLs לקבצי המילון ב-GitHub
+const HEBREW_DICT_URL = 'https://raw.githubusercontent.com/stain11111111/hebrew-dictionaries/main/hebrewDictionary.json';
+const COMMON_TYPOS_URL = 'https://raw.githubusercontent.com/stain11111111/hebrew-dictionaries/main/commonTypos.json';
 
-// משתנה עולמי לשמירת ה-timeout של הודעת הסטטוס
-let statusMessageTimeout; 
-
-// אלמנטים מה-HTML
-const inputText = document.getElementById('inputText');
-const outputText = document.getElementById('outputText');
-const hiddenFixedText = document.getElementById('hiddenFixedText');
-const fixButton = document.getElementById('fixButton');
-const copyButton = document.getElementById('copyButton');
-const downloadButton = document.getElementById('downloadButton'); 
-const clearButton = document.getElementById('clearButton');
-const statusMessage = document.getElementById('statusMessage');
-const summaryOutput = document.getElementById('summaryOutput');
-const trialStatusMessage = document.getElementById('trialStatusMessage');
-
-// הגדרת משתנים גלובליים למילונים שיאוחלפו לאחר טעינה
 let hebrewDictionary = new Set();
 let commonTypos = {};
 
-// פונקציה לטעינת המילונים מ-GitHub
-async function loadDictionaries() {
-    try {
-        // הקישורים הגולמיים (Raw URLs) של קבצי ה-JSON שלך מ-GitHub
-        const hebrewDictUrl = 'https://raw.githubusercontent.com/stain11111111/hebrew-dictionaries/main/hebrewDictionary.json'; 
-        const commonTyposUrl = 'https://raw.githubusercontent.com/stain11111111/hebrew-dictionaries/main/commonTypos.json'; 
+// אלמנטים מה-DOM
+const inputText = document.getElementById('inputText');
+const fixButton = document.getElementById('fixButton');
+const copyButton = document.getElementById('copyButton');
+const downloadButton = document.getElementById('downloadButton');
+const clearButton = document.getElementById('clearButton');
+const outputText = document.getElementById('outputText');
+const hiddenFixedText = document.getElementById('hiddenFixedText');
+const summaryOutput = document.getElementById('summaryOutput');
+const statusMessage = document.getElementById('statusMessage');
 
-        const [hebrewResponse, typosResponse] = await Promise.all([
-            fetch(hebrewDictUrl),
-            fetch(commonTyposUrl)
-        ]);
-
-        if (!hebrewResponse.ok) throw new Error(`HTTP error! status: ${hebrewResponse.status} for Hebrew dictionary`);
-        if (!typosResponse.ok) throw new Error(`HTTP error! status: ${typosResponse.status} for Common Typos`);
-
-        const hebrewData = await hebrewResponse.json();
-        const typosData = await typosResponse.json();
-
-        // המר את המילון הראשי ל-Set לאופטימיזציה
-        hebrewDictionary = new Set(hebrewData);
-        commonTypos = typosData;
-
-        console.log("Dictionaries loaded successfully from GitHub!");
-        showStatusMessage('המילונים נטענו בהצלחה!', 'success', 2000); // הודעה למשתמש ל-2 שניות
-    } catch (error) {
-        console.error("Failed to load dictionaries from GitHub:", error);
-        showStatusMessage('שגיאה בטעינת המילונים. אנא נסה שוב מאוחר יותר.', 'error', 5000); // הודעה ל-5 שניות
-        // אפשרות: לנטרל את כפתור התיקון אם המילונים לא נטענו
-        fixButton.disabled = true; 
-    }
-}
-
-// הגבלת שימושים
-let usesLeft = 10;
-const MAX_USES = 10;
-
-// פונקציה לשמירת נתונים ב-localStorage
-function saveToLocalStorage(key, value) {
-    try {
-        localStorage.setItem(key, JSON.stringify(value));
-    } catch (e) {
-        console.error("Error saving to localStorage:", e);
-    }
-}
-
-// פונקציה לטעינת נתונים מ-localStorage
-function loadFromLocalStorage(key) {
-    try {
-        const value = localStorage.getItem(key);
-        return value ? JSON.parse(value) : null;
-    } catch (e) {
-        console.error("Error loading from localStorage:", e);
-        return null;
-    }
-}
-
-// טעינת מספר השימושים שנותרו וטעינת המילונים
-document.addEventListener('DOMContentLoaded', () => {
-    const savedUses = loadFromLocalStorage('usesLeft');
-    if (savedUses !== null) {
-        usesLeft = savedUses;
-    }
-    updateTrialStatus();
-    loadDictionaries(); // קורא לטעינת המילונים בעת טעינת הדף
-    console.log("script.js loaded successfully!");
+document.addEventListener('DOMContentLoaded', async () => {
+    // טעינת מילונים
+    await loadDictionaries();
+    
+    // בדיקת סטטוס שימושים (הוסר - נשאר כאן להערה בלבד)
+    // updateTrialStatus(); 
 });
 
+async function loadDictionaries() {
+    showStatusMessage('טוען מילונים...', 'info');
+    try {
+        const [dictResponse, typosResponse] = await Promise.all([
+            fetch(HEBREW_DICT_URL),
+            fetch(COMMON_TYPOS_URL)
+        ]);
 
-// פונקציה לעדכון הודעת הניסיון
-function updateTrialStatus() {
-    if (usesLeft <= 0) {
-        trialStatusMessage.textContent = 'נגמרו לך השימושים החינמיים. אנא שקול לשדרג.';
-        fixButton.disabled = true;
-    } else {
-        trialStatusMessage.textContent = `נותרו לך ${usesLeft} שימושים חינמיים.`;
-        fixButton.disabled = false;
+        if (!dictResponse.ok) throw new Error(`HTTP error! status: ${dictResponse.status} from ${HEBREW_DICT_URL}`);
+        if (!typosResponse.ok) throw new Error(`HTTP error! status: ${typosResponse.status} from ${COMMON_TYPOS_URL}`);
+
+        const dictData = await dictResponse.json();
+        const typosData = await typosResponse.json();
+
+        hebrewDictionary = new Set(dictData);
+        commonTypos = typosData;
+
+        showStatusMessage('המילונים נטענו בהצלחה!', 'success');
+        console.log("Hebrew Dictionary Loaded. Size:", hebrewDictionary.size);
+        console.log("Common Typos Loaded. Keys:", Object.keys(commonTypos).length);
+        
+    } catch (error) {
+        console.error("Failed to load dictionaries:", error);
+        showStatusMessage(`שגיאה בטעינת המילונים: ${error.message}. אנא נסה שוב מאוחר יותר.`, 'error', 10000);
+        fixButton.disabled = true; // נטרל את הכפתור אם המילונים לא נטענו
     }
 }
 
-// פונקציה להצגת הודעות סטטוס
-function showStatusMessage(message, type = 'info', duration = 3000) {
-    const statusMessageElement = document.getElementById('statusMessage');
-    statusMessageElement.textContent = message;
-    // הסר קלאסים קודמים וודא שהקלאס 'message' תמיד קיים
-    statusMessageElement.className = `message show ${type}`; 
-    
-    // נקה כל טיימאאוט קודם לפני הגדרת חדש
-    if (statusMessageTimeout) {
-        clearTimeout(statusMessageTimeout);
+function showStatusMessage(message, type, duration = 3000) {
+    statusMessage.textContent = message;
+    statusMessage.className = `message show ${type}`; // Apply classes for styling and showing
+    if (statusMessage.timeoutId) {
+        clearTimeout(statusMessage.timeoutId);
     }
-
-    // הגדר טיימאאוט להסרת ההודעה
-    statusMessageTimeout = setTimeout(() => {
-        statusMessageElement.classList.remove('show');
+    statusMessage.timeoutId = setTimeout(() => {
+        statusMessage.classList.remove('show');
     }, duration);
 }
 
+// פונקציית מרחק לוינשטיין (Levenshtein Distance)
+function levenshteinDistance(a, b) {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
 
-// פונקציה לחישוב מרחק לוינשטיין (Levenshtein Distance)
-function levenshteinDistance(s1, s2) {
-    s1 = s1.toLowerCase();
-    s2 = s2.toLowerCase();
-    const costs = new Array();
-    for (let i = 0; i <= s1.length; i++) {
-        let lastValue = i;
-        for (let j = 0; j <= s2.length; j++) {
-            if (i === 0) {
-                costs[j] = j;
-            } else if (j > 0) {
-                let newValue = costs[j - 1];
-                if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
-                    newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-                }
-                costs[j - 1] = lastValue;
-                lastValue = newValue;
-            }
-        }
-        if (i > 0) {
-            costs[s2.length] = lastValue;
+    const matrix = [];
+
+    // increment along the first column of each row
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+
+    // increment each column in the first row
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+
+    // Fill in the rest of the matrix
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            const cost = (a.charAt(j - 1) === b.charAt(i - 1)) ? 0 : 1;
+            matrix[i][j] = Math.min(
+                matrix[i - 1][j] + 1, // deletion
+                matrix[i][j - 1] + 1, // insertion
+                matrix[i - 1][j - 1] + cost // substitution
+            );
         }
     }
-    return costs[s2.length];
+
+    return matrix[b.length][a.length];
 }
 
-// פונקציה למציאת המילה הקרובה ביותר במילון
-function findClosestWord(word, dictionary, maxDistance = 2) {
-    let closestWord = null;
-    let minDistance = Infinity;
-
-    // הסרת פיסוק מהמילה לבדיקה
-    const cleanWord = word.replace(/[^א-ת]/g, '');
-
-    if (!cleanWord) return null; // אם המילה ריקה אחרי הסרת פיסוק
-
-    for (const dictWord of dictionary) {
-        // הסרת פיסוק מהמילה במילון
-        const cleanDictWord = dictWord.replace(/[^א-ת]/g, '');
-        if (!cleanDictWord) continue;
-
-        const dist = levenshteinDistance(cleanWord, cleanDictWord);
-
-        if (dist <= maxDistance && dist < minDistance) {
-            minDistance = dist;
-            closestWord = dictWord;
-        }
-    }
-    return closestWord;
-}
-
-// פונקציה לתיקון פיסוק בלבד
-function fixPunctuation(text) {
-    let fixedText = text;
-
-    // הסרת רווחים כפולים ורווחים מיותרים בהתחלה ובסוף
-    fixedText = fixedText.replace(/\s+/g, ' ').trim();
-
-    // הוספת רווח אחרי פיסוק אם אין (חוץ מגרשיים, מירכאות, וסוגריים)
-    fixedText = fixedText.replace(/([.,?!:;])(?=\S)/g, '$1 ');
-    fixedText = fixedText.replace(/(\S)\((?=\S)/g, '$1 ('); // הוסף רווח לפני סוגר פותח אם אין
-    fixedText = fixedText.replace(/(?<=\S)\)(\S)/g, ') $1'); // הוסף רווח אחרי סוגר סוגר אם אין
+// פונקציה לתיקון איות ופיסוק
+function fixText(text) {
+    // שלב 1: תיקון פיסוק - טיפול ברווחים לפני/אחרי סימני פיסוק
+    // מוודא שיש רווח אחרי פסיק, נקודה, נקודתיים, נקודה פסיק, סימן שאלה, סימן קריאה, ומונע רווח לפניהם.
+    let fixedText = text.replace(/([.,:;?!])(?!\s|$)/g, '$1 ').replace(/\s+([.,:;?!])/g, '$1');
     
-    // הסרת רווחים לפני פיסוק (למעט סוגריים פותחים)
-    fixedText = fixedText.replace(/\s+([.,?!:;])/g, '$1');
-    fixedText = fixedText.replace(/\s+\)/g, ')');
-    
-    // טיפול במירכאות וגרשיים
-    fixedText = fixedText.replace(/(\S)"/g, '$1"'); // הסר רווח לפני מירכאה פותחת
-    fixedText = fixedText.replace(/"(\S)/g, '"$1'); // הסר רווח אחרי מירכאה פותחת
-    fixedText = fixedText.replace(/(\S)"/g, '$1"'); // הסר רווח לפני מירכאה סוגרת
-    fixedText = fixedText.replace(/"(\S)/g, '"$1'); // הסר רווח אחרי מירכאה סוגרת
-
-    fixedText = fixedText.replace(/(\S)'/g, '$1\''); // הסר רווח לפני גרש
-    fixedText = fixedText.replace(/'(\S)/g, '\'$1'); // הסר רווח אחרי גרש
-
-    // טיפול בנקודות שלוש (אליפסיס)
-    fixedText = fixedText.replace(/\s*\.{3}\s*/g, '...');
-
-    // טיפול במקף
-    fixedText = fixedText.replace(/(\S)-(\S)/g, '$1 - $2'); // הוסף רווחים סביב מקף בין מילים
-    fixedText = fixedText.replace(/\s+-\s+/g, ' - '); // ודא שיש רווח בודד סביב מקפים
-    
-    // הסרת רווחים כפולים שוב בסוף התהליך
-    fixedText = fixedText.replace(/\s+/g, ' ').trim();
-
-    return fixedText;
-}
+    // מירכאות וגרשיים
+    fixedText = fixedText.replace(/(\s|^)"(\S)/g, '$1" $2'); // רווח אחרי מירכאה פותחת
+    fixedText = fixedText.replace(/(\S)"(\s|$)/g, '$1" $2'); // רווח לפני מירכאה סוגרת
+    fixedText = fixedText.replace(/(\s|^)'(\S)/g, '$1\' $2'); // רווח אחרי גרש פותח
+    fixedText = fixedText.replace(/(\S)'(\s|$)/g, '$1\' $2'); // רווח לפני גרש סוגר
 
 
-// פונקציה לביצוע ההשוואה וההדגשה
-function generateHighlightedOutput(originalText, fixedText, typosCorrections) {
-    const originalWords = originalText.split(/(\s+|[.,?!:;'"()`\[\]{}<>#@$%^&*+\-_=\\/\/`])/).filter(word => word !== '');
-    const fixedWords = fixedText.split(/(\s+|[.,?!:;'"()`\[\]{}<>#@$%^&*+\-_=\\/\/`])/).filter(word => word !== '');
+    // שלב 2: תיקון איות
+    // השתמש בביטוי רגולרי לזיהוי מילים, כולל מילים עם גרשיים ומקפים
+    const words = fixedText.match(/[\p{L}\d'"-]+|[.,:;?!"]+\s*|\s+/gu) || []; // תמיכה מלאה בעברית ובמספרים
+    let correctedWords = [];
+    let changes = []; // מערך לאחסון השינויים
 
-    let outputHtml = '';
-    let originalIndex = 0;
-    let fixedIndex = 0;
-
-    const punctuationFixes = [];
-    const addedWords = [];
-    const removedWords = [];
-    const spellingFixes = [];
-
-    while (originalIndex < originalWords.length || fixedIndex < fixedWords.length) {
-        const originalSegment = originalWords[originalIndex] || '';
-        const fixedSegment = fixedWords[fixedIndex] || '';
-
-        // אם המילה המקורית נמצאת בתיקוני איות
-        const typoFixed = typosCorrections[originalSegment];
-        if (typoFixed && typoFixed === fixedSegment) {
-            outputHtml += `<span class="highlight-typo" title="תוקן ל: ${typoFixed}">${originalSegment}</span> `;
-            spellingFixes.push(`${originalSegment} -> ${typoFixed}`);
-            originalIndex++;
-            fixedIndex++;
-            continue;
+    words.forEach(word => {
+        // התעלם מרווחים כ"מילים" לתיקון איות
+        if (word.trim() === '') {
+            correctedWords.push(word);
+            return;
         }
 
-        // אם מקטעים זהים, הוסף אותם כרגיל
-        if (originalSegment === fixedSegment) {
-            outputHtml += `${fixedSegment} `;
-            originalIndex++;
-            fixedIndex++;
-        } else {
-            // ניסיון לזהות שינויים בפיסוק או מילים שאינן תואמות ישירות
-            let foundMatch = false;
+        const originalWord = word.replace(/[.,:;?!'"]/g, '').toLowerCase(); // נקה פיסוק לבדיקה
+        const punctuationBefore = word.match(/^([.,:;?!'"]+)/)?.[1] || '';
+        const punctuationAfter = word.match(/([.,:;?!'"]+)$/)?.[1] || '';
+        const nonAlphaNumBefore = word.match(/^([^\p{L}\d]+)/u)?.[1] || ''; // תווים לא אלפאנומריים לפני
+        const nonAlphaNumAfter = word.match(/([^\p{L}\d]+)$/u)?.[1] || ''; // תווים לא אלפאנומריים אחרי
 
-            // חפש אם המקטע המקורי קיים קדימה בטקסט המתוקן
-            for (let i = fixedIndex; i < fixedWords.length; i++) {
-                if (originalSegment === fixedWords[i] && originalSegment.trim() !== '') { // וודא שהמקטע לא רווח ריק
-                    // מצאנו התאמה, כל מה שביניהם נוסף
-                    for (let j = fixedIndex; j < i; j++) {
-                        outputHtml += `<span class="highlight-added">${fixedWords[j]}</span> `;
-                        addedWords.push(fixedWords[j]);
+
+        // בדיקה במילון הטעויות הנפוצות קודם
+        if (commonTypos[originalWord]) {
+            const corrected = commonTypos[originalWord];
+            correctedWords.push(nonAlphaNumBefore + corrected + nonAlphaNumAfter);
+            changes.push({
+                type: 'typo',
+                original: originalWord,
+                corrected: corrected
+            });
+        }
+        // בדיקה במילון העברי הראשי - אם המילה קיימת, היא נכונה ולא צריך לתקן אותה
+        else if (hebrewDictionary.has(originalWord)) {
+            correctedWords.push(word); // השאר את המילה המקורית עם הפיסוק שלה
+        }
+        // ניסיון למצוא תיקון קרוב (Levenshtein) רק אם המילה לא נמצאת במילון הראשי
+        else {
+            let bestMatch = originalWord;
+            let minDistance = Infinity; // לדוגמה: 2
+            const wordsToCheck = Array.from(hebrewDictionary); // המילון כרשימה
+
+            // בדיקת דמיון רק למילים לא קצרות מדי (למנוע תיקונים שגויים של אותיות/מילים קצרות)
+            if (originalWord.length > 1) { 
+                for (const dictWord of wordsToCheck) {
+                    const distance = levenshteinDistance(originalWord, dictWord);
+                    if (distance < minDistance && distance <= 2) { // ניתן לשנות את הסף
+                        minDistance = distance;
+                        bestMatch = dictWord;
                     }
-                    outputHtml += `${originalSegment} `; // המקטע המקורי התאמה
-                    fixedIndex = i + 1;
-                    originalIndex++;
-                    foundMatch = true;
-                    break;
                 }
             }
             
-            if (!foundMatch) {
-                // חפש אם המקטע המתוקן קיים קדימה בטקסט המקורי
-                for (let i = originalIndex; i < originalWords.length; i++) {
-                    if (fixedSegment === originalWords[i] && fixedSegment.trim() !== '') { // וודא שהמקטע לא רווח ריק
-                        // מצאנו התאמה, כל מה שביניהם הוסר
-                        for (let j = originalIndex; j < i; j++) {
-                            outputHtml += `<span class="highlight-removed">${originalWords[j]}</span> `;
-                            removedWords.push(originalWords[j]);
-                        }
-                        outputHtml += `${fixedSegment} `; // המקטע המתוקן התאמה
-                        originalIndex = i + 1;
-                        fixedIndex++;
-                        foundMatch = true;
-                        break;
-                    }
+            // אם נמצא תיקון רלוונטי
+            if (bestMatch !== originalWord && minDistance <= 2) {
+                correctedWords.push(nonAlphaNumBefore + bestMatch + nonAlphaNumAfter);
+                changes.push({
+                    type: 'typo',
+                    original: originalWord,
+                    corrected: bestMatch
+                });
+            } else {
+                // אם לא נמצא תיקון, השאר את המילה המקורית אבל סמן כשגיאה פוטנציאלית
+                correctedWords.push(word);
+                if (originalWord.length > 0 && isNaN(originalWord)) { // אל תסמן מספרים כשגיאות
+                     changes.push({
+                         type: 'unknown',
+                         original: originalWord,
+                         corrected: null
+                     });
                 }
-            }
-
-            if (!foundMatch) {
-                // אם עדיין לא נמצאה התאמה, זה שינוי או הוספה/הסרה בסוף
-                if (originalSegment && !fixedSegment) { // מקטע הוסר
-                    outputHtml += `<span class="highlight-removed">${originalSegment}</span> `;
-                    removedWords.push(originalSegment);
-                    originalIndex++;
-                } else if (!originalSegment && fixedSegment) { // מקטע נוסף
-                    outputHtml += `<span class="highlight-added">${fixedSegment}</span> `;
-                    addedWords.push(fixedSegment);
-                    fixedIndex++;
-                } else { // החלפת מקטע או שינוי פיסוק/איות
-                    // בדיקה אם זה רק שינוי פיסוק סביב מילה
-                    const cleanOriginal = originalSegment.replace(/[^א-ת]/g, '');
-                    const cleanFixed = fixedSegment.replace(/[^א-ת]/g, '');
-                    
-                    if (cleanOriginal === cleanFixed && originalSegment !== fixedSegment && cleanOriginal.length > 0) {
-                        // זה כנראה שינוי פיסוק
-                        outputHtml += `<span class="highlight-added" title="תוקן פיסוק">${fixedSegment}</span> `;
-                        punctuationFixes.push(`${originalSegment} -> ${fixedSegment}`);
-                    } else if (originalSegment.trim() !== '' || fixedSegment.trim() !== '') {
-                        // החלפה כללית של מקטע (לאו דווקא איות)
-                        outputHtml += `<span class="highlight-removed">${originalSegment}</span> <span class="highlight-added">${fixedSegment}</span> `;
-                        removedWords.push(originalSegment);
-                        addedWords.push(fixedSegment);
-                    }
-                    originalIndex++;
-                    fixedIndex++;
-                }
+               
             }
         }
-    }
+    });
 
-    let summaryHtml = '<ul>';
-    if (punctuationFixes.length > 0) {
-        summaryHtml += `<li><strong>תיקוני פיסוק (${punctuationFixes.length}):</strong> ${punctuationFixes.join(', ')}.</li>`;
-    }
-    if (spellingFixes.length > 0) {
-    summaryHtml += `<li><strong>תיקוני איות (${spellingFixes.length}):</strong> ${spellingFixes.join(', ')}.</li>`;
-    }
-    if (addedWords.length > 0) {
-        summaryHtml += `<li><strong>מילים/מקטעים שנוספו (${addedWords.length}):</strong> ${addedWords.join(', ')}.</li>`;
-    }
-    if (removedWords.length > 0) {
-        summaryHtml += `<li><strong>מילים/מקטעים שהוסרו (${removedWords.length}):</strong> ${removedWords.join(', ')}.</li>`;
-    }
-    if (punctuationFixes.length === 0 && spellingFixes.length === 0 && addedWords.length === 0 && removedWords.length === 0) {
-        summaryHtml += '<li>לא זוהו תיקונים או שגיאות. הטקסט תקין.</li>';
-    }
-    summaryHtml += '</ul>';
+    // הרכבת הטקסט המתוקן מחדש
+    const finalFixedText = correctedWords.join(''); // חיבור מחדש
+    
+    return {
+        fixedText: finalFixedText,
+        changes: changes
+    };
+}
 
-    summaryOutput.innerHTML = summaryHtml;
-    return outputHtml.trim();
+// פונקציה להדגשת השינויים
+function generateHighlightedOutput(originalText, fixedText) {
+    const diff = Diff.diffChars(originalText, fixedText);
+    let outputHtml = '';
+    const summaryList = []; // ליצירת סיכום התיקונים
+
+    diff.forEach(part => {
+        const value = part.value;
+        if (part.added) {
+            outputHtml += `<span class="highlight-added">${value}</span>`;
+            summaryList.push(`הוספה: ${value}`);
+        } else if (part.removed) {
+            outputHtml += `<span class="highlight-removed">${value}</span>`;
+            summaryList.push(`הסרה: ${value}`);
+        } else {
+            outputHtml += value;
+        }
+    });
+
+    return { html: outputHtml, summary: summaryList };
 }
 
 
-// פונקציה ראשית לטיפול בטקסט
+// כפתור "תקן טקסט"
 fixButton.addEventListener('click', () => {
-    // ודא שהמילונים נטענו והם מכילים נתונים
-    if (hebrewDictionary.size === 0 || Object.keys(commonTypos).length === 0) {
-        showStatusMessage('המילונים עדיין נטענים או שלא נטענו בהצלחה. אנא המתן או רענן את העמוד.', 'error', 5000);
-        console.error("Dictionaries not ready or empty!");
+    const originalInput = inputText.value;
+    if (originalInput.trim() === '') {
+        showStatusMessage('אנא הכנס טקסט לתיקון.', 'info');
         return;
     }
 
-    if (usesLeft <= 0) {
-        showStatusMessage('נגמרו לך השימושים החינמיים. אנא שקול לשדרג.', 'error', 5000);
-        return;
-    }
+    showStatusMessage('מתקן טקסט...', 'info');
+    
+    // בצע את התיקון בפועל
+    const { fixedText, changes } = fixText(originalInput);
+    
+    // הצג את הטקסט המתוקן בתיבת הפלט
+    outputText.innerHTML = ''; // נקה תוכן קודם
+    // העבר את הטקסט המתוקן לשדה הנסתר לצורך העתקה/הורדה
+    hiddenFixedText.value = fixedText; 
 
-    let originalText = inputText.value;
-    if (!originalText.trim()) {
-        showStatusMessage('אנא הכנס טקסט לבדיקה.', 'error', 3000);
-        return;
-    }
-
-    let fixedText = originalText;
-    const currentTyposCorrections = {};
-    const words = fixedText.split(/\s+/); // פיצול לפי רווחים
-
-    let tempFixedWords = [];
-
-    // 1. תיקון שגיאות כתיב נפוצות (commonTypos)
-    for (const word of words) {
-        const cleanWord = word.replace(/[^א-ת]/g, ''); // הסר פיסוק מהמילה
-        if (cleanWord && commonTypos[cleanWord]) { // ודא שיש מילה נקייה ושקיים תיקון
-            const correctedWord = commonTypos[cleanWord];
-            // שמור תיקון ב-currentTyposCorrections כדי שנוכל להדגיש מאוחר יותר
-            currentTyposCorrections[word] = correctedWord; 
-            tempFixedWords.push(word.replace(cleanWord, correctedWord)); // החלף רק את חלק המילה, השאר פיסוק מקורי
-        } else {
-            tempFixedWords.push(word);
-        }
-    }
-    fixedText = tempFixedWords.join(' ');
-
-
-    // 2. תיקון פיסוק
-    fixedText = fixPunctuation(fixedText);
-
-
-    // 3. בדיקת איות מול המילון (hebrewDictionary) - אם לא תוקן כבר ב-commonTypos
-    const finalWordsForSpellCheck = fixedText.split(/\s+/); // פיצול מחדש לאחר תיקון פיסוק
-    let finalFixedTextArray = [];
-
-    for (const word of finalWordsForSpellCheck) {
-        const cleanWord = word.replace(/[^א-ת]/g, ''); // הסר פיסוק מהמילה לבדיקה
-        // בדוק אם המילה הנקייה קיימת ואינה במילון, וגם לא תוקנה כבר בשגיאות נפוצות (typosCorrections)
-        if (cleanWord && !hebrewDictionary.has(cleanWord) && !currentTyposCorrections[word]) {
-            const closest = findClosestWord(cleanWord, hebrewDictionary);
-            if (closest) {
-                // החלף רק את החלק של האותיות במילה, השאר את הפיסוק המקורי
-                const correctedWordWithPunctuation = word.replace(cleanWord, closest);
-                finalFixedTextArray.push(correctedWordWithPunctuation);
-                currentTyposCorrections[word] = closest; // שמור את התיקון המילולי להדגשה
-            } else {
-                finalFixedTextArray.push(word); // השאר כפי שהיה
-            }
-        } else {
-            finalFixedTextArray.push(word);
-        }
-    }
-    const finalFixedText = finalFixedTextArray.join(' ');
-
-
-    // הצגת הטקסט המתוקן עם הדגשות
-    const highlightedHtml = generateHighlightedOutput(originalText, finalFixedText, currentTyposCorrections);
+    // בנה את התצוגה המודגשת ואת סיכום השינויים
+    const { html: highlightedHtml, summary: diffSummary } = generateHighlightedOutput(originalInput, fixedText);
     outputText.innerHTML = highlightedHtml;
-    hiddenFixedText.value = finalFixedText; // שמירה עבור העתקה/הורדה
 
-    usesLeft--;
-    saveToLocalStorage('usesLeft', usesLeft);
-    updateTrialStatus();
-    showStatusMessage('הטקסט תוקן ונבדק בהצלחה!', 'success', 3000);
+    // הצג סיכום תיקונים
+    summaryOutput.innerHTML = '';
+    const ul = document.createElement('ul');
+    if (changes.length === 0 && diffSummary.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'לא זוהו תיקונים בטקסט.';
+        ul.appendChild(li);
+    } else {
+        // הוסף תיקוני איות מהלוגיקה של fixText
+        changes.forEach(change => {
+            const li = document.createElement('li');
+            if (change.type === 'typo') {
+                li.textContent = `תוקן איות: ${change.original} -> ${change.corrected}`;
+            } else if (change.type === 'unknown') {
+                li.textContent = `אזהרה: המילה "${change.original}" לא נמצאה במילון.`;
+            }
+            ul.appendChild(li);
+        });
+
+        // הוסף סיכום שינויים מהשוואת הטקסטים
+        diffSummary.forEach(item => {
+             const li = document.createElement('li');
+             li.textContent = item;
+             ul.appendChild(li);
+        });
+    }
+    summaryOutput.appendChild(ul);
+    
+    showStatusMessage('הטקסט תוקן בהצלחה!', 'success');
 });
 
-// פונקציה להעתקת הטקסט המתוקן
+// כפתור "העתק טקסט מתוקן"
 copyButton.addEventListener('click', () => {
-    if (!hiddenFixedText.value) {
-        showStatusMessage('אין טקסט להעתקה.', 'error', 3000);
+    if (hiddenFixedText.value.trim() === '') {
+        showStatusMessage('אין טקסט להעתקה.', 'info');
         return;
     }
-    navigator.clipboard.writeText(hiddenFixedText.value).then(() => {
-        showStatusMessage('הטקסט הועתק בהצלחה!', 'success', 3000);
-    }).catch(err => {
-        showStatusMessage('שגיאה בהעתקת הטקסט.', 'error', 3000);
-        console.error('Could not copy text: ', err);
-    });
+    hiddenFixedText.select();
+    hiddenFixedText.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand("copy");
+    showStatusMessage('הטקסט המתוקן הועתק!', 'success');
 });
 
-// פונקציה להורדת הטקסט המתוקן
+// כפתור "הורד טקסט מתוקן"
 downloadButton.addEventListener('click', () => {
-    if (!hiddenFixedText.value) {
-        showStatusMessage('אין טקסט להורדה.', 'error', 3000);
+    if (hiddenFixedText.value.trim() === '') {
+        showStatusMessage('אין טקסט להורדה.', 'info');
         return;
     }
-    const filename = 'טקסט-מתוקן.txt';
-    const blob = new Blob([hiddenFixedText.value], { type: 'text/plain;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
-    showStatusMessage('הטקסט הורד בהצלחה!', 'success', 3000);
+    const filename = "טקסט_מתוקן.txt";
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(hiddenFixedText.value));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    showStatusMessage('הטקסט המתוקן יורד לקובץ.', 'success');
 });
 
-// פונקציה לניקוי שדות הטקסט
+// כפתור "נקה"
 clearButton.addEventListener('click', () => {
     inputText.value = '';
     outputText.innerHTML = '';
     hiddenFixedText.value = '';
     summaryOutput.innerHTML = '<ul><li>אין תיקונים או שגיאות שזוהו עדיין.</li></ul>';
-    showStatusMessage('השדות נוקו.', 'info', 3000);
+    showStatusMessage('שדות הטקסט נוקו.', 'info');
 });
