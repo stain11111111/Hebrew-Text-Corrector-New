@@ -157,7 +157,7 @@ function fixText(text) {
                         bestMatch = dictWord;
                     }
                 }
-            }
+            } // <--- זה הסוגר המסולסל שחסר היה כאן!
             
             // אם נמצא תיקון רלוונטי
             if (bestMatch !== originalWord && minDistance <= 2) {
@@ -177,7 +177,7 @@ function fixText(text) {
                          corrected: null
                      });
                 }
-               
+                
             }
         }
     });
@@ -193,19 +193,25 @@ function fixText(text) {
 
 // פונקציה להדגשת השינויים
 function generateHighlightedOutput(originalText, fixedText) {
-    const diff = Diff.diffChars(originalText, fixedText);
+    // השתמש ב-diff_match_patch (Diff) כפי שהוגדר גלובלית
+    const dmp = new diff_match_patch();
+    const diff = dmp.diff_main(originalText, fixedText);
+    dmp.diff_cleanupSemantic(diff); // אופציונלי: לשיפור קריאות ההבדלים
+
     let outputHtml = '';
     const summaryList = []; // ליצירת סיכום התיקונים
 
     diff.forEach(part => {
-        const value = part.value;
-        if (part.added) {
+        const value = part[1]; // חלק[1] מכיל את הטקסט
+        const type = part[0];  // חלק[0] מכיל את סוג השינוי (0=שווה, 1=הוספה, -1=הסרה)
+
+        if (type === 1) { // Added
             outputHtml += `<span class="highlight-added">${value}</span>`;
-            summaryList.push(`הוספה: ${value}`);
-        } else if (part.removed) {
+            summaryList.push(`הוספה: "${value}"`);
+        } else if (type === -1) { // Removed
             outputHtml += `<span class="highlight-removed">${value}</span>`;
-            summaryList.push(`הסרה: ${value}`);
-        } else {
+            summaryList.push(`הסרה: "${value}"`);
+        } else { // Equal
             outputHtml += value;
         }
     });
