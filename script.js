@@ -1,6 +1,7 @@
- // קובץ script.js - כולל לוגיקת תיקון ודגשה מלאה
-// המילונים מגיעים מקובץ dictionaries.js
-// ודא ש dictionaries.js נטען לפני script.js ב-HTML
+// קובץ script.js - כולל לוגיקת תיקון ודגשה מלאה
+
+// משתנה עולמי לשמירת ה-timeout של הודעת הסטטוס
+let statusMessageTimeout; 
 
 // אלמנטים מה-HTML
 const inputText = document.getElementById('inputText');
@@ -8,11 +9,47 @@ const outputText = document.getElementById('outputText');
 const hiddenFixedText = document.getElementById('hiddenFixedText');
 const fixButton = document.getElementById('fixButton');
 const copyButton = document.getElementById('copyButton');
-const downloadButton = document.getElementById('downloadButton'); // התיקון כאן!
+const downloadButton = document.getElementById('downloadButton'); 
 const clearButton = document.getElementById('clearButton');
 const statusMessage = document.getElementById('statusMessage');
 const summaryOutput = document.getElementById('summaryOutput');
 const trialStatusMessage = document.getElementById('trialStatusMessage');
+
+// הגדרת משתנים גלובליים למילונים שיאוחלפו לאחר טעינה
+let hebrewDictionary = new Set();
+let commonTypos = {};
+
+// פונקציה לטעינת המילונים מ-GitHub
+async function loadDictionaries() {
+    try {
+        // הקישורים הגולמיים (Raw URLs) של קבצי ה-JSON שלך מ-GitHub
+        const hebrewDictUrl = 'https://raw.githubusercontent.com/stain11111111/hebrew-dictionaries/main/hebrewDictionary.json'; 
+        const commonTyposUrl = 'https://raw.githubusercontent.com/stain11111111/hebrew-dictionaries/main/commonTypos.json'; 
+
+        const [hebrewResponse, typosResponse] = await Promise.all([
+            fetch(hebrewDictUrl),
+            fetch(commonTyposUrl)
+        ]);
+
+        if (!hebrewResponse.ok) throw new Error(`HTTP error! status: ${hebrewResponse.status} for Hebrew dictionary`);
+        if (!typosResponse.ok) throw new Error(`HTTP error! status: ${typosResponse.status} for Common Typos`);
+
+        const hebrewData = await hebrewResponse.json();
+        const typosData = await typosResponse.json();
+
+        // המר את המילון הראשי ל-Set לאופטימיזציה
+        hebrewDictionary = new Set(hebrewData);
+        commonTypos = typosData;
+
+        console.log("Dictionaries loaded successfully from GitHub!");
+        showStatusMessage('המילונים נטענו בהצלחה!', 'success', 2000); // הודעה למשתמש ל-2 שניות
+    } catch (error) {
+        console.error("Failed to load dictionaries from GitHub:", error);
+        showStatusMessage('שגיאה בטעינת המילונים. אנא נסה שוב מאוחר יותר.', 'error', 5000); // הודעה ל-5 שניות
+        // אפשרות: לנטרל את כפתור התיקון אם המילונים לא נטענו
+        fixButton.disabled = true; 
+    }
+}
 
 // הגבלת שימושים
 let usesLeft = 10;
@@ -38,13 +75,14 @@ function loadFromLocalStorage(key) {
     }
 }
 
-// טעינת מספר השימושים שנותרו
+// טעינת מספר השימושים שנותרו וטעינת המילונים
 document.addEventListener('DOMContentLoaded', () => {
     const savedUses = loadFromLocalStorage('usesLeft');
     if (savedUses !== null) {
         usesLeft = savedUses;
     }
     updateTrialStatus();
+    loadDictionaries(); // קורא לטעינת המילונים בעת טעינת הדף
     console.log("script.js loaded successfully!");
 });
 
@@ -61,13 +99,23 @@ function updateTrialStatus() {
 }
 
 // פונקציה להצגת הודעות סטטוס
-function showStatusMessage(message, type = 'info') {
-    statusMessage.textContent = message;
-    statusMessage.className = `message show ${type}`;
-    setTimeout(() => {
-        statusMessage.classList.remove('show');
-    }, 3000);
+function showStatusMessage(message, type = 'info', duration = 3000) {
+    const statusMessageElement = document.getElementById('statusMessage');
+    statusMessageElement.textContent = message;
+    // הסר קלאסים קודמים וודא שהקלאס 'message' תמיד קיים
+    statusMessageElement.className = `message show ${type}`; 
+    
+    // נקה כל טיימאאוט קודם לפני הגדרת חדש
+    if (statusMessageTimeout) {
+        clearTimeout(statusMessageTimeout);
+    }
+
+    // הגדר טיימאאוט להסרת ההודעה
+    statusMessageTimeout = setTimeout(() => {
+        statusMessageElement.classList.remove('show');
+    }, duration);
 }
+
 
 // פונקציה לחישוב מרחק לוינשטיין (Levenshtein Distance)
 function levenshteinDistance(s1, s2) {
@@ -267,7 +315,7 @@ function generateHighlightedOutput(originalText, fixedText, typosCorrections) {
         summaryHtml += `<li><strong>תיקוני פיסוק (${punctuationFixes.length}):</strong> ${punctuationFixes.join(', ')}.</li>`;
     }
     if (spellingFixes.length > 0) {
-        summaryHtml += `<li><strong>תיקוני איות (${spellingFixes.length}):</strong> ${spellingFixes.join(', ')}.</li>`;
+    summaryHtml += `<li><strong>תיקוני איות (${spellingFixes.length}):</strong> ${spellingFixes.join(', ')}.</li>`;
     }
     if (addedWords.length > 0) {
         summaryHtml += `<li><strong>מילים/מקטעים שנוספו (${addedWords.length}):</strong> ${addedWords.join(', ')}.</li>`;
@@ -287,21 +335,21 @@ function generateHighlightedOutput(originalText, fixedText, typosCorrections) {
 
 // פונקציה ראשית לטיפול בטקסט
 fixButton.addEventListener('click', () => {
-    // ודא שהמילונים נטענו
-    if (typeof hebrewDictionary === 'undefined' || typeof commonTypos === 'undefined') {
-        showStatusMessage('המילונים עדיין לא נטענו. אנא רענן את העמוד.', 'error');
-        console.error("Dictionaries not loaded!");
+    // ודא שהמילונים נטענו והם מכילים נתונים
+    if (hebrewDictionary.size === 0 || Object.keys(commonTypos).length === 0) {
+        showStatusMessage('המילונים עדיין נטענים או שלא נטענו בהצלחה. אנא המתן או רענן את העמוד.', 'error', 5000);
+        console.error("Dictionaries not ready or empty!");
         return;
     }
 
     if (usesLeft <= 0) {
-        showStatusMessage('נגמרו לך השימושים החינמיים. אנא שקול לשדרג.', 'error');
+        showStatusMessage('נגמרו לך השימושים החינמיים. אנא שקול לשדרג.', 'error', 5000);
         return;
     }
 
     let originalText = inputText.value;
     if (!originalText.trim()) {
-        showStatusMessage('אנא הכנס טקסט לבדיקה.', 'error');
+        showStatusMessage('אנא הכנס טקסט לבדיקה.', 'error', 3000);
         return;
     }
 
@@ -314,7 +362,7 @@ fixButton.addEventListener('click', () => {
     // 1. תיקון שגיאות כתיב נפוצות (commonTypos)
     for (const word of words) {
         const cleanWord = word.replace(/[^א-ת]/g, ''); // הסר פיסוק מהמילה
-        if (commonTypos[cleanWord]) {
+        if (cleanWord && commonTypos[cleanWord]) { // ודא שיש מילה נקייה ושקיים תיקון
             const correctedWord = commonTypos[cleanWord];
             // שמור תיקון ב-currentTyposCorrections כדי שנוכל להדגיש מאוחר יותר
             currentTyposCorrections[word] = correctedWord; 
@@ -336,13 +384,14 @@ fixButton.addEventListener('click', () => {
 
     for (const word of finalWordsForSpellCheck) {
         const cleanWord = word.replace(/[^א-ת]/g, ''); // הסר פיסוק מהמילה לבדיקה
-        if (cleanWord && !hebrewDictionary.has(cleanWord) && !currentTyposCorrections[word]) { // אם לא תוקן כבר ואין במילון
+        // בדוק אם המילה הנקייה קיימת ואינה במילון, וגם לא תוקנה כבר בשגיאות נפוצות (typosCorrections)
+        if (cleanWord && !hebrewDictionary.has(cleanWord) && !currentTyposCorrections[word]) {
             const closest = findClosestWord(cleanWord, hebrewDictionary);
             if (closest) {
                 // החלף רק את החלק של האותיות במילה, השאר את הפיסוק המקורי
                 const correctedWordWithPunctuation = word.replace(cleanWord, closest);
                 finalFixedTextArray.push(correctedWordWithPunctuation);
-                currentTyposCorrections[word] = correctedWordWithPunctuation; // הוסף לתיקונים כדי שיודגש
+                currentTyposCorrections[word] = closest; // שמור את התיקון המילולי להדגשה
             } else {
                 finalFixedTextArray.push(word); // השאר כפי שהיה
             }
@@ -361,19 +410,19 @@ fixButton.addEventListener('click', () => {
     usesLeft--;
     saveToLocalStorage('usesLeft', usesLeft);
     updateTrialStatus();
-    showStatusMessage('הטקסט תוקן ונבדק בהצלחה!', 'success');
+    showStatusMessage('הטקסט תוקן ונבדק בהצלחה!', 'success', 3000);
 });
 
 // פונקציה להעתקת הטקסט המתוקן
 copyButton.addEventListener('click', () => {
     if (!hiddenFixedText.value) {
-        showStatusMessage('אין טקסט להעתקה.', 'error');
+        showStatusMessage('אין טקסט להעתקה.', 'error', 3000);
         return;
     }
     navigator.clipboard.writeText(hiddenFixedText.value).then(() => {
-        showStatusMessage('הטקסט הועתק בהצלחה!', 'success');
+        showStatusMessage('הטקסט הועתק בהצלחה!', 'success', 3000);
     }).catch(err => {
-        showStatusMessage('שגיאה בהעתקת הטקסט.', 'error');
+        showStatusMessage('שגיאה בהעתקת הטקסט.', 'error', 3000);
         console.error('Could not copy text: ', err);
     });
 });
@@ -381,7 +430,7 @@ copyButton.addEventListener('click', () => {
 // פונקציה להורדת הטקסט המתוקן
 downloadButton.addEventListener('click', () => {
     if (!hiddenFixedText.value) {
-        showStatusMessage('אין טקסט להורדה.', 'error');
+        showStatusMessage('אין טקסט להורדה.', 'error', 3000);
         return;
     }
     const filename = 'טקסט-מתוקן.txt';
@@ -393,7 +442,7 @@ downloadButton.addEventListener('click', () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
-    showStatusMessage('הטקסט הורד בהצלחה!', 'success');
+    showStatusMessage('הטקסט הורד בהצלחה!', 'success', 3000);
 });
 
 // פונקציה לניקוי שדות הטקסט
@@ -402,5 +451,5 @@ clearButton.addEventListener('click', () => {
     outputText.innerHTML = '';
     hiddenFixedText.value = '';
     summaryOutput.innerHTML = '<ul><li>אין תיקונים או שגיאות שזוהו עדיין.</li></ul>';
-    showStatusMessage('השדות נוקו.', 'info');
+    showStatusMessage('השדות נוקו.', 'info', 3000);
 });

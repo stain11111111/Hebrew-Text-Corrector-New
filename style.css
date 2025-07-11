@@ -1,4 +1,4 @@
-body { 
+body {
     font-family: 'Arial', sans-serif;
     background-color: #f4f7f6;
     display: flex;
@@ -69,7 +69,7 @@ textarea {
     overflow-wrap: break-word;
 }
 
-/* סגנונות הדגשה */
+/* סגנונות הדגשה לשינויים בטקסט */
 .highlight-added {
     background-color: #d4edda; /* ירוק בהיר */
     color: #155724; /* ירוק כהה */
@@ -94,6 +94,28 @@ textarea {
     border-radius: 2px;
 }
 
+/* סגנונות למילים מוכרות, לא מוכרות ופיסוק - חדש או מעודכן */
+.token-item {
+    display: inline; /* כדי שה-span לא ישבור שורה */
+    white-space: pre-wrap; /* שומר על רווחים בתוך ה-span */
+    overflow-wrap: break-word; /* מונע גלישה של מילים ארוכות */
+}
+
+.known-word {
+    color: #27ae60; /* ירוק למילים מוכרות */
+    font-weight: normal;
+}
+
+.unknown-word {
+    color: #e74c3c; /* אדום למילים לא מוכרות */
+    font-weight: bold;
+}
+
+.punctuation {
+    color: #7f8c8d; /* אפור כהה לפיסוק */
+    font-weight: normal;
+}
+
 .buttons-container {
     margin-bottom: 25px;
     display: flex;
@@ -102,41 +124,87 @@ textarea {
     gap: 10px;
 }
 
+/* סגנונות לכפתורים - גדולים, צבעוניים ויפים יותר */
 button {
-    background-color: #3498db;
+    background-color: #3498db; /* כחול עז */
     color: white;
     border: none;
-    padding: 12px 25px;
-    border-radius: 5px;
+    padding: 15px 30px; /* הגדלה משמעותית של הכפתורים */
+    border-radius: 8px; /* פינות מעוגלות יותר */
     cursor: pointer;
-    font-size: 1.1em;
-    transition: background-color 0.3s ease;
+    font-size: 1.2em; /* טקסט גדול יותר בכפתור */
+    font-weight: bold; /* הדגשת טקסט */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* אנימציות מעבר חלקות */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* צל עדין למראה תלת-ממדי */
+    text-transform: uppercase; /* אותיות גדולות */
+    letter-spacing: 0.5px; /* רווח קל בין אותיות */
 }
 
 button:hover {
-    background-color: #2980b9;
+    background-color: #2980b9; /* כחול כהה יותר בריחוף */
+    transform: translateY(-2px); /* אפקט הרמה קל */
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.2); /* צל מודגש יותר בריחוף */
+}
+
+button:active {
+    transform: translateY(0); /* חזרה למצב רגיל בלחיצה */
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15); /* צל קטן יותר בלחיצה */
 }
 
 button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
 }
 
+/* סגנונות להודעת הסטטוס - כ"חלון קופץ" מרכזי יותר */
 .message {
     font-weight: bold;
-    margin-top: -10px;
-    margin-bottom: 15px;
     opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; /* הוסף מעבר לטרנספורמציה */
+    padding: 15px 25px; /* ריפוד בסיסי */
+    border-radius: 8px; /* פינות מעוגלות */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* צל עדין */
+    text-align: center;
+    position: fixed; /* מקם מעל הכל */
+    top: 50%; /* ממורכז אנכית */
+    left: 50%; /* ממורכז אופקית */
+    transform: translate(-50%, -50%) scale(0.9); /* התחלה קטנה ומרכוז */
+    z-index: 1000; /* ודא שהוא מעל שאר התוכן */
+    min-width: 250px;
 }
 
 .message.show {
     opacity: 1;
+    transform: translate(-50%, -50%) scale(1); /* גודל מלא ומרכוז בעת הצגה */
+    /* אנימציה לדעיכה אוטומטית */
+    animation: fadeInOutMessage 3.5s forwards;
 }
 
-.message.success { color: #27ae60; }
-.message.error { color: #e74c3c; }
-.message.info { color: #34495e; }
+.message.success {
+    background-color: #d4edda; /* ירוק בהיר */
+    color: #155724; /* ירוק כהה */
+    border: 1px solid #c3e6cb;
+}
+.message.error {
+    background-color: #f8d7da; /* אדום בהיר */
+    color: #721c24; /* אדום כהה */
+    border: 1px solid #f5c6cb;
+}
+.message.info {
+    background-color: #e2e3e5; /* אפור בהיר */
+    color: #383d41; /* אפור כהה */
+    border: 1px solid #d6d8db;
+}
+
+/* אנימציית דעיכה לחלון הקופץ */
+@keyframes fadeInOutMessage {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+    10% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    90% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+}
 
 #summaryOutput {
     margin-top: 20px;

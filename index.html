@@ -3,29 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מתקן פיסוק ובודק איות</title>
+    <title>בודק ומתקן איות ופיסוק בעברית</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>מתקן פיסוק ובודק איות</h1>
-        <p>הדבק כאן את הטקסט לתיקון ולבדיקה (Ctrl+V):</p>
-        <textarea id="inputText" placeholder="הדבק את הטקסט לתיקון..."></textarea>
+        <h1>בודק ומתקן איות ופיסוק בעברית</h1>
+        <p>הכנס טקסט בעברית לתיקון איות ופיסוק:</p>
+        <textarea id="inputText" placeholder="הקלד או הדבק טקסט כאן..."></textarea>
 
         <div class="buttons-container">
-            <button id="fixButton">תקן ובדוק</button>
-            <button id="copyButton">העתק טקסט</button>
+            <button id="fixButton">תקן טקסט</button>
+            <button id="copyButton">העתק טקסט מתוקן</button>
             <button id="downloadButton">הורד טקסט מתוקן</button>
-            <button id="clearButton">נקה הכל</button>
+            <button id="clearButton">נקה</button>
         </div>
-        <div id="trialStatusMessage"></div>
-        <div id="statusMessage" class="message"></div>
-        <p>טקסט מתוקן (שינויים מודגשים):</p>
-        <div id="outputText" class="output-display" contenteditable="false"></div>
 
-        <textarea id="hiddenFixedText" style="display:none;"></textarea>
+        <p id="trialStatusMessage">טוען סטטוס שימושים...</p>
 
-        <p>סיכום התיקונים והשגיאות:</p>
+        <p>טקסט מתוקן:</p>
+        <div id="outputText" class="output-display"></div>
+        <textarea id="hiddenFixedText"></textarea> <p>סיכום תיקונים:</p>
         <div id="summaryOutput">
             <ul>
                 <li>אין תיקונים או שגיאות שזוהו עדיין.</li>
@@ -33,7 +31,8 @@
         </div>
     </div>
 
-    <script src="dictionaries.js"></script>
+    <div id="statusMessage" class="message"></div>
+
     <script src="script.js"></script>
 </body>
 </html>
