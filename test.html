@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מתקן טקסט עברי - בדיקה (עדכון: 11 יולי 2025, 10:41)</title>
+    <title>מתקן טקסט עברי - בדיקה</title>
     <link rel="stylesheet" href="style.css">
     <script src="diff_match_patch.js"></script>
 </head>
 <body>
-    <div class="container"> <header>
-            <h1>מתקן טקסט עברי אוטומטי (דף בדיקה - 10:41)</h1>
+    <div class="container">
+        <header>
+            <h1>מתקן טקסט עברי אוטומטי</h1>
             <p>כלי לתיקון שגיאות כתיב ופיסוק בטקסטים בעברית.</p>
         </header>
 
@@ -17,7 +18,8 @@
             <section class="input-section">
                 <h2>הכנס טקסט לתיקון</h2>
                 <textarea id="inputText" placeholder="הקלד או הדבק טקסט כאן..."></textarea>
-                <div class="buttons-container"> <button id="fixButton" class="main-button">תקן טקסט</button>
+                <div class="buttons-container">
+                    <button id="fixButton" class="main-button">תקן טקסט</button>
                     <button id="clearButton" class="secondary-button">נקה הכל</button>
                 </div>
                 <div id="statusMessage" class="message"></div>
@@ -27,7 +29,8 @@
                 <h2>טקסט מתוקן</h2>
                 <div id="outputTextDisplay" class="output-display"></div>
                 <input type="hidden" id="hiddenFixedText">
-                <div class="buttons-container"> <button id="copyButton" class="main-button">העתק טקסט מתוקן</button>
+                <div class="buttons-container">
+                    <button id="copyButton" class="main-button">העתק טקסט מתוקן</button>
                     <button id="downloadButton" class="secondary-button">הורד טקסט מתוקן</button>
                 </div>
             </section>
@@ -45,6 +48,8 @@
         <footer>
             <p>&copy; 2024 כלי לתיקון טקסט עברי. כל הזכויות שמורות.</p>
         </footer>
-    </div> <script src="script.js"></script>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

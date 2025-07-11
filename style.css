@@ -20,21 +20,20 @@ body {
     max-width: 700px;
     text-align: center;
     direction: rtl;
-    /* הוספתי display: flex ו-flex-direction: column כדי לסדר את התוכן בתוך הקונטיינר */
     display: flex;
     flex-direction: column;
-    align-items: center; /* מרכז את התוכן בתוך הקונטיינר */
+    align-items: center;
 }
 
 header, main, footer, section {
-    width: 100%; /* ודא שכל החלקים תופסים את רוחב הקונטיינר */
-    max-width: 650px; /* רוחב מקסימלי לתוכן בפנים */
-    margin-bottom: 20px; /* רווח בין סקשנים */
+    width: 100%;
+    max-width: 650px;
+    margin-bottom: 20px;
 }
 
 h1 {
     color: #2c3e50;
-    margin-bottom: 10px; /* הקטנתי קצת את המרווח */
+    margin-bottom: 10px;
     font-size: 2em;
 }
 
@@ -43,7 +42,7 @@ h2 {
     margin-top: 20px;
     margin-bottom: 15px;
     font-size: 1.5em;
-    text-align: right; /* יישור לימין עבור כותרות סקשנים */
+    text-align: right;
 }
 
 p {
@@ -53,7 +52,7 @@ p {
 }
 
 textarea {
-    width: 100%; /* שיניתי ל-100% כדי שיתאים לרוחב ההורה */
+    width: 100%;
     height: 150px;
     padding: 10px;
     margin-bottom: 20px;
@@ -66,13 +65,12 @@ textarea {
     text-align: right;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    box-sizing: border-box; /* ודא שהריפוד נכלל ברוחב */
+    box-sizing: border-box;
 }
 
-/* התאם את ה-ID החדש של תיבת הפלט */
-#outputTextDisplay { /* שיניתי מ-.output-display ל-#outputTextDisplay */
-    width: 100%; /* שיניתי ל-100% */
-    min-height: 150px; /* שיניתי מ-height ל-min-height כדי לאפשר התרחבות */
+#outputTextDisplay {
+    width: 100%;
+    min-height: 150px;
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid #ccc;
@@ -83,20 +81,19 @@ textarea {
     direction: rtl;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    box-sizing: border-box; /* ודא שהריפוד נכלל ברוחב */
+    box-sizing: border-box;
 }
 
-/* סגנונות הדגשה לשינויים בטקסט */
 .highlight-added {
-    background-color: #d4edda; /* ירוק בהיר */
-    color: #155724; /* ירוק כהה */
+    background-color: #d4edda;
+    color: #155724;
     font-weight: bold;
     padding: 1px 0px;
     border-radius: 2px;
 }
 .highlight-removed {
-    background-color: #f8d7da; /* אדום בהיר */
-    color: #721c24; /* אדום כהה */
+    background-color: #f8d7da;
+    color: #721c24;
     text-decoration: line-through;
     font-weight: bold;
     padding: 1px 0px;
@@ -104,79 +101,77 @@ textarea {
 }
 
 .highlight-typo {
-    text-decoration: underline wavy red; /* קו תחתון גלי אדום */
+    text-decoration: underline wavy red;
     font-weight: bold;
     cursor: help;
     padding: 1px 0px;
     border-radius: 2px;
 }
 
-/* סגנונות למילים מוכרות, לא מוכרות ופיסוק - חדש או מעודכן */
 .token-item {
-    display: inline; /* כדי שה-span לא ישבור שורה */
-    white-space: pre-wrap; /* שומר על רווחים בתוך ה-span */
-    overflow-wrap: break-word; /* מונע גלישה של מילים ארוכות */
+    display: inline;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
 }
 
 .known-word {
-    color: #27ae60; /* ירוק למילים מוכרות */
+    color: #27ae60;
     font-weight: normal;
 }
 
 .unknown-word {
-    color: #e74c3c; /* אדום למילים לא מוכרות */
+    color: #e74c3c;
     font-weight: bold;
 }
 
 .punctuation {
-    color: #7f8c8d; /* אפור כהה לפיסוק */
+    color: #7f8c8d;
     font-weight: normal;
 }
 
-.buttons-container { /* התאמה לשם המחלקה ב-HTML */
-    margin-top: 10px; /* רווח מהטקסטאריה */
+.buttons-container {
+    margin-top: 10px;
     margin-bottom: 25px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 15px; /* הגדלתי את הרווח בין הכפתורים */
-    width: 100%; /* ודא שהקונטיינר של הכפתורים תופס את כל הרוחב */
+    gap: 15px;
+    width: 100%;
 }
 
-/* סגנונות לכפתורים - גדולים, צבעוניים ויפים יותר */
 button {
-    background-color: #3498db; /* כחול עז */
+    background-color: #3498db;
     color: white;
     border: none;
-    padding: 15px 30px; /* הגדלה משמעותית של הכפתורים */
-    border-radius: 8px; /* פינות מעוגלות יותר */
+    padding: 15px 30px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 1.2em; /* טקסט גדול יותר בכפתור */
-    font-weight: bold; /* הדגשת טקסט */
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* אנימציות מעבר חלקות */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* צל עדין למראה תלת-ממדי */
-    text-transform: uppercase; /* אותיות גדולות */
-    letter-spacing: 0.5px; /* רווח קל בין אותיות */
-    min-width: 180px; /* רוחב מינימלי לכפתורים כדי שיראו טוב יותר */
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 180px;
 }
 
-.secondary-button { /* סגנון ייחודי לכפתורים משניים כמו "נקה הכל" */
-    background-color: #6c757d; /* אפור */
+.secondary-button {
+    background-color: #6c757d;
 }
 
 .secondary-button:hover {
-    background-color: #5a6268; /* אפור כהה יותר בריחוף */
+    background-color: #5a6268;
 }
 
 button:hover {
-    background-color: #2980b9; /* כחול כהה יותר בריחוף */
-    transform: translateY(-2px); /* אפקט הרמה קל */
-    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.2); /* צל מודגש יותר בריחוף */
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.2);
 }
 
 button:active {
-    transform: translateY(0); /* חזרה למצב רגיל בלחיצה */
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15); /* צל קטן יותר בלחיצה */
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
 button:disabled {
@@ -186,47 +181,44 @@ button:disabled {
     transform: none;
 }
 
-/* סגנונות להודעת הסטטוס - כ"חלון קופץ" מרכזי יותר */
 .message {
     font-weight: bold;
     opacity: 0;
-    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; /* הוסף מעבר לטרנספורמציה */
-    padding: 15px 25px; /* ריפוד בסיסי */
-    border-radius: 8px; /* פינות מעוגלות */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* צל עדין */
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
-    position: fixed; /* מקם מעל הכל */
-    top: 50%; /* ממורכז אנכית */
-    left: 50%; /* ממורכז אופקית */
-    transform: translate(-50%, -50%) scale(0.9); /* התחלה קטנה ומרכוז */
-    z-index: 1000; /* ודא שהוא מעל שאר התוכן */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    z-index: 1000;
     min-width: 250px;
 }
 
 .message.show {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1); /* גודל מלא ומרכוז בעת הצגה */
-    /* אנימציה לדעיכה אוטומטית */
+    transform: translate(-50%, -50%) scale(1);
     animation: fadeInOutMessage 3.5s forwards;
 }
 
 .message.success {
-    background-color: #d4edda; /* ירוק בהיר */
-    color: #155724; /* ירוק כהה */
+    background-color: #d4edda;
+    color: #155724;
     border: 1px solid #c3e6cb;
 }
 .message.error {
-    background-color: #f8d7da; /* אדום בהיר */
-    color: #721c24; /* אדום כהה */
+    background-color: #f8d7da;
+    color: #721c24;
     border: 1px solid #f5c6cb;
 }
 .message.info {
-    background-color: #e2e3e5; /* אפור בהיר */
-    color: #383d41; /* אפור כהה */
+    background-color: #e2e3e5;
+    color: #383d41;
     border: 1px solid #d6d8db;
 }
 
-/* אנימציית דעיכה לחלון הקופץ */
 @keyframes fadeInOutMessage {
     0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
     10% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -235,7 +227,7 @@ button:disabled {
 }
 
 .summary-section {
-    text-align: right; /* יישור לימין לכל הסקשן */
+    text-align: right;
 }
 
 #summaryOutput {
@@ -263,10 +255,9 @@ button:disabled {
     color: #555;
     font-size: 0.9em;
     margin-top: 5px;
-    min-height: 1.2em; /* כדי למנוע קפיצות תוכן */
+    min-height: 1.2em;
 }
 
-/* התאמות לרוחב קטן יותר */
 @media (max-width: 600px) {
     .container {
         padding: 15px;
@@ -275,12 +266,12 @@ button:disabled {
     button {
         padding: 12px 20px;
         font-size: 1em;
-        min-width: unset; /* בטל רוחב מינימלי במוביל */
-        flex-grow: 1; /* אפשר לכפתורים לגדול ולמלא רוחב */
+        min-width: unset;
+        flex-grow: 1;
     }
 
     .buttons-container {
-        flex-direction: column; /* הצג כפתורים בעמודה אחת במוביל */
-        gap: 10px; /* רווח קטן יותר במוביל */
+        flex-direction: column;
+        gap: 10px;
     }
 }
