@@ -1,38 +1,47 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>בודק ומתקן איות ופיסוק בעברית</title>
+    <title>כלי לתיקון איות ופיסוק בעברית</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>בודק ומתקן איות ופיסוק בעברית</h1>
-        <p>הכנס טקסט בעברית לתיקון איות ופיסוק:</p>
-        <textarea id="inputText" placeholder="הקלד או הדבק טקסט כאן..."></textarea>
+        <h1>כלי לתיקון איות ופיסוק בעברית</h1>
 
-        <div class="buttons-container">
-            <button id="fixButton">תקן טקסט</button>
-            <button id="copyButton">העתק טקסט מתוקן</button>
-            <button id="downloadButton">הורד טקסט מתוקן</button>
-            <button id="clearButton">נקה</button>
+        <div class="input-section">
+            <textarea id="inputText" placeholder="הכנס/הדבק טקסט כאן..."></textarea>
+            <div class="buttons-row">
+                <button id="fixButton">תקן טקסט</button>
+                <button id="clearButton">נקה הכל</button>
+            </div>
         </div>
 
-        <p id="trialStatusMessage">טוען סטטוס שימושים...</p>
-
-        <p>טקסט מתוקן:</p>
-        <div id="outputText" class="output-display"></div>
-        <textarea id="hiddenFixedText"></textarea> <p>סיכום תיקונים:</p>
-        <div id="summaryOutput">
-            <ul>
-                <li>אין תיקונים או שגיאות שזוהו עדיין.</li>
-            </ul>
+        <div class="output-section">
+            <h2>טקסט מתוקן:</h2>
+            <div id="outputText" class="output-text" contenteditable="true"></div>
+            <textarea id="hiddenFixedText" style="position: absolute; left: -9999px;"></textarea>
+            <div class="buttons-row">
+                <button id="copyButton">העתק טקסט מתוקן</button>
+                <button id="downloadButton">הורד טקסט מתוקן</button>
+            </div>
         </div>
+
+        <div class="summary-section">
+            <h2>סיכום תיקונים:</h2>
+            <div id="summaryOutput" class="summary-output">
+                <ul>
+                    <li>אין תיקונים או שגיאות שזוהו עדיין.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="statusMessage" class="message"></div>
     </div>
 
-    <div id="statusMessage" class="message"></div>
-
+    <script src="diff_match_patch.js"></script>
+    
     <script src="script.js"></script>
 </body>
 </html>
