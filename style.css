@@ -20,12 +20,30 @@ body {
     max-width: 700px;
     text-align: center;
     direction: rtl;
+    /* הוספתי display: flex ו-flex-direction: column כדי לסדר את התוכן בתוך הקונטיינר */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* מרכז את התוכן בתוך הקונטיינר */
+}
+
+header, main, footer, section {
+    width: 100%; /* ודא שכל החלקים תופסים את רוחב הקונטיינר */
+    max-width: 650px; /* רוחב מקסימלי לתוכן בפנים */
+    margin-bottom: 20px; /* רווח בין סקשנים */
 }
 
 h1 {
     color: #2c3e50;
-    margin-bottom: 25px;
+    margin-bottom: 10px; /* הקטנתי קצת את המרווח */
     font-size: 2em;
+}
+
+h2 {
+    color: #34495e;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+    text-align: right; /* יישור לימין עבור כותרות סקשנים */
 }
 
 p {
@@ -35,7 +53,7 @@ p {
 }
 
 textarea {
-    width: calc(100% - 20px);
+    width: 100%; /* שיניתי ל-100% כדי שיתאים לרוחב ההורה */
     height: 150px;
     padding: 10px;
     margin-bottom: 20px;
@@ -48,15 +66,13 @@ textarea {
     text-align: right;
     white-space: pre-wrap;
     overflow-wrap: break-word;
+    box-sizing: border-box; /* ודא שהריפוד נכלל ברוחב */
 }
 
-#hiddenFixedText {
-    display: none;
-}
-
-.output-display {
-    width: calc(100% - 20px);
-    height: 150px;
+/* התאם את ה-ID החדש של תיבת הפלט */
+#outputTextDisplay { /* שיניתי מ-.output-display ל-#outputTextDisplay */
+    width: 100%; /* שיניתי ל-100% */
+    min-height: 150px; /* שיניתי מ-height ל-min-height כדי לאפשר התרחבות */
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid #ccc;
@@ -67,6 +83,7 @@ textarea {
     direction: rtl;
     white-space: pre-wrap;
     overflow-wrap: break-word;
+    box-sizing: border-box; /* ודא שהריפוד נכלל ברוחב */
 }
 
 /* סגנונות הדגשה לשינויים בטקסט */
@@ -116,12 +133,14 @@ textarea {
     font-weight: normal;
 }
 
-.buttons-container {
+.buttons-container { /* התאמה לשם המחלקה ב-HTML */
+    margin-top: 10px; /* רווח מהטקסטאריה */
     margin-bottom: 25px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
+    gap: 15px; /* הגדלתי את הרווח בין הכפתורים */
+    width: 100%; /* ודא שהקונטיינר של הכפתורים תופס את כל הרוחב */
 }
 
 /* סגנונות לכפתורים - גדולים, צבעוניים ויפים יותר */
@@ -138,6 +157,15 @@ button {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* צל עדין למראה תלת-ממדי */
     text-transform: uppercase; /* אותיות גדולות */
     letter-spacing: 0.5px; /* רווח קל בין אותיות */
+    min-width: 180px; /* רוחב מינימלי לכפתורים כדי שיראו טוב יותר */
+}
+
+.secondary-button { /* סגנון ייחודי לכפתורים משניים כמו "נקה הכל" */
+    background-color: #6c757d; /* אפור */
+}
+
+.secondary-button:hover {
+    background-color: #5a6268; /* אפור כהה יותר בריחוף */
 }
 
 button:hover {
@@ -206,6 +234,10 @@ button:disabled {
     100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
 }
 
+.summary-section {
+    text-align: right; /* יישור לימין לכל הסקשן */
+}
+
 #summaryOutput {
     margin-top: 20px;
     padding: 15px;
@@ -232,4 +264,23 @@ button:disabled {
     font-size: 0.9em;
     margin-top: 5px;
     min-height: 1.2em; /* כדי למנוע קפיצות תוכן */
+}
+
+/* התאמות לרוחב קטן יותר */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 1em;
+        min-width: unset; /* בטל רוחב מינימלי במוביל */
+        flex-grow: 1; /* אפשר לכפתורים לגדול ולמלא רוחב */
+    }
+
+    .buttons-container {
+        flex-direction: column; /* הצג כפתורים בעמודה אחת במוביל */
+        gap: 10px; /* רווח קטן יותר במוביל */
+    }
 }

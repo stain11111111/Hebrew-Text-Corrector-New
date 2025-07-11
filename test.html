@@ -8,45 +8,43 @@
     <script src="diff_match_patch.js"></script>
 </head>
 <body>
-    <header>
-        <h1>מתקן טקסט עברי אוטומטי (דף בדיקה - 10:41)</h1>
-        <p>כלי לתיקון שגיאות כתיב ופיסוק בטקסטים בעברית.</p>
-    </header>
+    <div class="container"> <header>
+            <h1>מתקן טקסט עברי אוטומטי (דף בדיקה - 10:41)</h1>
+            <p>כלי לתיקון שגיאות כתיב ופיסוק בטקסטים בעברית.</p>
+        </header>
 
-    <main>
-        <section class="input-section">
-            <h2>הכנס טקסט לתיקון</h2>
-            <textarea id="inputText" placeholder="הקלד או הדבק טקסט כאן..."></textarea>
-            <div class="buttons">
-                <button id="fixButton" class="main-button">תקן טקסט</button>
-                <button id="clearButton" class="secondary-button">נקה הכל</button>
-            </div>
-            <div id="statusMessage" class="message"></div>
-        </section>
+        <main>
+            <section class="input-section">
+                <h2>הכנס טקסט לתיקון</h2>
+                <textarea id="inputText" placeholder="הקלד או הדבק טקסט כאן..."></textarea>
+                <div class="buttons-container"> <button id="fixButton" class="main-button">תקן טקסט</button>
+                    <button id="clearButton" class="secondary-button">נקה הכל</button>
+                </div>
+                <div id="statusMessage" class="message"></div>
+            </section>
 
-        <section class="output-section">
-            <h2>טקסט מתוקן</h2>
-            <div id="outputText" class="fixed-text-display"></div>
-            <input type="hidden" id="hiddenFixedText"> <div class="buttons">
-                <button id="copyButton" class="main-button">העתק טקסט מתוקן</button>
-                <button id="downloadButton" class="secondary-button">הורד טקסט מתוקן</button>
-            </div>
-        </section>
+            <section class="output-section">
+                <h2>טקסט מתוקן</h2>
+                <div id="outputTextDisplay" class="output-display"></div>
+                <input type="hidden" id="hiddenFixedText">
+                <div class="buttons-container"> <button id="copyButton" class="main-button">העתק טקסט מתוקן</button>
+                    <button id="downloadButton" class="secondary-button">הורד טקסט מתוקן</button>
+                </div>
+            </section>
 
-        <section class="summary-section">
-            <h2>סיכום תיקונים</h2>
-            <div id="summaryOutput" class="summary-display">
-                <ul>
-                    <li>אין תיקונים או שגיאות שזוהו עדיין.</li>
-                </ul>
-            </div>
-        </section>
-    </main>
+            <section class="summary-section">
+                <h2>סיכום תיקונים</h2>
+                <div id="summaryOutput" class="summary-display">
+                    <ul>
+                        <li>אין תיקונים או שגיאות שזוהו עדיין.</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
 
-    <footer>
-        <p>&copy; 2024 כלי לתיקון טקסט עברי. כל הזכויות שמורות.</p>
-    </footer>
-
-    <script src="script.js"></script>
+        <footer>
+            <p>&copy; 2024 כלי לתיקון טקסט עברי. כל הזכויות שמורות.</p>
+        </footer>
+    </div> <script src="script.js"></script>
 </body>
 </html>
