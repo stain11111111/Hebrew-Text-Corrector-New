@@ -11,7 +11,7 @@ const fixButton = document.getElementById('fixButton');
 const copyButton = document.getElementById('copyButton');
 const downloadButton = document.getElementById('downloadButton');
 const clearButton = document.getElementById('clearButton');
-const outputTextDisplay = document.getElementById('outputTextDisplay'); // *** שינוי קריטי כאן! ***
+const outputTextDisplay = document.getElementById('outputText'); // נשאר outputText לפי ה-HTML
 const hiddenFixedText = document.getElementById('hiddenFixedText');
 const summaryOutput = document.getElementById('summaryOutput');
 const statusMessage = document.getElementById('statusMessage');
@@ -86,17 +86,46 @@ function levenshteinDistance(a, b) {
     return matrix[b.length][a.length];
 }
 
+// *** פונקציה חדשה לטיפול בכללי פיסוק ***
+function applyPunctuationRules(text) {
+    let currentText = text;
+
+    // 1. ניקוי רווחים כללי ונירמול
+    currentText = currentText.replace(/\s+/g, ' '); // רווחים מרובים הופכים לרווח בודד
+    currentText = currentText.replace(/\s*([.,:;?!"])\s*/g, '$1 '); // רווח אחרי פיסוק, אין רווח לפני
+    currentText = currentText.replace(/([.,:;?!"])\s*$/, '$1'); // אם הפיסוק בסוף שורה, אל תוסיף רווח מיותר
+    currentText = currentText.replace(/\(\s*/g, '(').replace(/\s*\)/g, ')'); // רווחים בתוך סוגריים
+
+    // 2. כללים ספציפיים (כרגע בסיסיים מאוד - נרחיב בהמשך!)
+    // פסיק לפני "ש" - גרסה בסיסית ומוגבלת (דורש שיפור בהמשך)
+    // הערה: כלל זה יכול לייצר false positives, נדייק אותו בהמשך לפי הדוגמאות שלך.
+    currentText = currentText.replace(/(\S)(?<![.,:;?!"])\sש(\S)/g, '$1, ש$2'); // למנוע פסיק אם יש כבר סימן פיסוק
+
+    // טיפול בגרשיים (אגריש = ') - לוודא שאין רווחים פנימיים
+    currentText = currentText.replace(/'\s*(\S)/g, '\'$1'); // אם יש ' ואז רווח ואז תו - להוריד רווח
+    currentText = currentText.replace(/(\S)\s*'/g, '$1\''); // אם יש תו ואז רווח ואז ' - להוריד רווח
+
+    // טיפול במרכאות (גרשיים כפולים = ") - לוודא שאין רווחים פנימיים
+    currentText = currentText.replace(/"\s*(\S)/g, '"$1');
+    currentText = currentText.replace(/(\S)\s*"/g, '$1"');
+
+
+    // כללים נוספים שיבואו כאן
+    // ...
+
+    return currentText;
+}
+
+
 function fixText(text) {
-    let fixedText = text.replace(/([.,:;?!])(?!\s|$)/g, '$1 ').replace(/\s+([.,:;?!])/g, '$1');
+    // שלב 1: תיקון פיסוק כללי ונירמול רווחים
+    let currentText = applyPunctuationRules(text);
+    let changes = []; // רשימת השינויים שתאסוף גם תיקוני כתיב
 
-    fixedText = fixedText.replace(/(\s|^)"(\S)/g, '$1" $2');
-    fixedText = fixedText.replace(/(\S)"(\s|$)/g, '$1" $2');
-    fixedText = fixedText.replace(/(\s|^)'(\S)/g, '$1\' $2');
-    fixedText = fixedText.replace(/(\S)'(\s|$)/g, '$1\' $2');
-
-    const words = fixedText.match(/[\p{L}\d'"-]+|[.,:;?!"]+\s*|\s+/gu) || [];
+    // שלב 2: פיצול מילים וטיפול בשגיאות כתיב (מבוסס מילון ולוינשטיין)
+    // השתמש ב-currentText לאחר תיקוני הפיסוק
+    const words = currentText.match(/[\p{L}\d'"-]+|[.,:;?!"]+\s*|\s+/gu) || [];
     let correctedWords = [];
-    let changes = [];
 
     words.forEach(word => {
         if (word.trim() === '') {
@@ -104,13 +133,12 @@ function fixText(text) {
             return;
         }
 
-        const originalWord = word.replace(/[.,:;?!'"]/g, '').toLowerCase();
-        const punctuationBefore = word.match(/^([.,:;?!'"]+)/)?.[1] || '';
-        const punctuationAfter = word.match(/([.,:;?!'"]+)$/)?.[1] || '';
-        const nonAlphaNumBefore = word.match(/^([^\p{L}\d]+)/u)?.[1] || '';
-        const nonAlphaNumAfter = word.match(/([^\p{L}\d]+)$/u)?.[1] || '';
+        const originalWord = word.replace(/[.,:;?!'"]/g, '').toLowerCase(); // מילה ללא פיסוק, בlowercase
+        const nonAlphaNumBefore = word.match(/^([^\p{L}\d]+)/u)?.[1] || ''; // לכידת תווים שאינם אותיות/מספרים לפני המילה
+        const nonAlphaNumAfter = word.match(/([^\p{L}\d]+)$/u)?.[1] || ''; // לכידת תווים שאינם אותיות/מספרים אחרי המילה
 
         if (commonTypos[originalWord]) {
+            // תיקון שגיאות נפוצות ידועות
             const corrected = commonTypos[originalWord];
             correctedWords.push(nonAlphaNumBefore + corrected + nonAlphaNumAfter);
             changes.push({
@@ -118,26 +146,26 @@ function fixText(text) {
                 original: originalWord,
                 corrected: corrected
             });
-        }
-        else if (hebrewDictionary.has(originalWord)) {
+        } else if (hebrewDictionary.has(originalWord)) {
+            // מילה קיימת במילון - לא צריך לתקן
             correctedWords.push(word);
-        }
-        else {
+        } else {
+            // מילה לא קיימת במילון ולא שגיאה נפוצה - נסה מרחק לוינשטיין
             let bestMatch = originalWord;
             let minDistance = Infinity;
-            const wordsToCheck = Array.from(hebrewDictionary);
+            const wordsToCheck = Array.from(hebrewDictionary); // המרת ה-Set למערך לביצוע לולאה
 
-            if (originalWord.length > 1) {
+            if (originalWord.length > 1) { // רק אם המילה מספיק ארוכה כדי להיות טעות הקלדה סבירה
                 for (const dictWord of wordsToCheck) {
                     const distance = levenshteinDistance(originalWord, dictWord);
-                    if (distance < minDistance && distance <= 2) {
+                    if (distance < minDistance && distance <= 1) { // *** השינוי המרכזי כאן: סף 1 ***
                         minDistance = distance;
                         bestMatch = dictWord;
                     }
                 }
             }
 
-            if (bestMatch !== originalWord && minDistance <= 2) {
+            if (bestMatch !== originalWord && minDistance <= 1) { // ודא שהתגלה תיקון טוב
                 correctedWords.push(nonAlphaNumBefore + bestMatch + nonAlphaNumAfter);
                 changes.push({
                     type: 'typo',
@@ -145,13 +173,14 @@ function fixText(text) {
                     corrected: bestMatch
                 });
             } else {
+                // לא נמצא תיקון אוטומטי סביר, השאר את המילה כפי שהיא וסמן כאזהרה
                 correctedWords.push(word);
-                if (originalWord.length > 0 && isNaN(originalWord)) {
-                     changes.push({
-                         type: 'unknown',
-                         original: originalWord,
-                         corrected: null
-                     });
+                if (originalWord.length > 0 && isNaN(originalWord)) { // אל תסמן מספרים כ"לא ידועים"
+                    changes.push({
+                        type: 'unknown',
+                        original: originalWord,
+                        corrected: null
+                    });
                 }
             }
         }
@@ -165,6 +194,7 @@ function fixText(text) {
     };
 }
 
+
 function generateHighlightedOutput(originalText, fixedText) {
     const dmp = new diff_match_patch();
     const diff = dmp.diff_main(originalText, fixedText);
@@ -175,7 +205,7 @@ function generateHighlightedOutput(originalText, fixedText) {
 
     diff.forEach(part => {
         const value = part[1];
-        const type = part[0];
+        const type = part[0]; // -1 = removed, 0 = common, 1 = added
 
         if (type === 1) {
             outputHtml += `<span class="highlight-added">${value}</span>`;
@@ -203,12 +233,12 @@ fixButton.addEventListener('click', () => {
 
     const { fixedText, changes } = fixText(originalInput);
 
-    // *** חשוב: שימוש ב-outputTextDisplay במקום outputText ***
+    // *** תיקון שגוי: outputTextDisplay אמור להיות outputText לפי ה-HTML ***
+    // זה תוקן בתחילת הקובץ, אז כאן זה בסדר
     outputTextDisplay.innerHTML = '';
     hiddenFixedText.value = fixedText;
 
     const { html: highlightedHtml, summary: diffSummary } = generateHighlightedOutput(originalInput, fixedText);
-    // *** חשוב: שימוש ב-outputTextDisplay במקום outputText ***
     outputTextDisplay.innerHTML = highlightedHtml;
 
     summaryOutput.innerHTML = '';
@@ -218,20 +248,22 @@ fixButton.addEventListener('click', () => {
         li.textContent = 'לא זוהו תיקונים בטקסט.';
         ul.appendChild(li);
     } else {
+        // הוספת סיכום שינויי כתיב/לא ידועים מה-fixText
         changes.forEach(change => {
             const li = document.createElement('li');
             if (change.type === 'typo') {
-                li.textContent = `תוקן איות: ${change.original} -> ${change.corrected}`;
+                li.textContent = `תוקן איות: "${change.original}" -> "${change.corrected}"`;
             } else if (change.type === 'unknown') {
                 li.textContent = `אזהרה: המילה "${change.original}" לא נמצאה במילון.`;
             }
             ul.appendChild(li);
         });
 
+        // הוספת סיכום שינויי הפיסוק מה-diff_match_patch (הוספות/הסרות תווים)
         diffSummary.forEach(item => {
-             const li = document.createElement('li');
-             li.textContent = item;
-             ul.appendChild(li);
+            const li = document.createElement('li');
+            li.textContent = item;
+            ul.appendChild(li);
         });
     }
     summaryOutput.appendChild(ul);
@@ -274,7 +306,7 @@ downloadButton.addEventListener('click', () => {
 
 clearButton.addEventListener('click', () => {
     inputText.value = '';
-    outputTextDisplay.innerHTML = ''; // *** שינוי קריטי כאן! ***
+    outputTextDisplay.innerHTML = '';
     hiddenFixedText.value = '';
     summaryOutput.innerHTML = '<ul><li>אין תיקונים או שגיאות שזוהו עדיין.</li></ul>';
     showStatusMessage('שדות הטקסט נוקו.', 'info');
