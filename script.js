@@ -1,4 +1,4 @@
-// URLs לקבצי המילון ב-GitHub
+ // URLs לקבצי המילון ב-GitHub
 const HEBREW_DICT_URL = 'https://raw.githubusercontent.com/stain11111111/hebrew-dictionaries/main/hebrewDictionary.json';
 const COMMON_TYPOS_URL = 'https://raw.githubusercontent.com/stain11111111/hebrew-dictionaries/main/commonTypos.json';
 
