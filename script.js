@@ -1,6 +1,6 @@
 // URLs לקבצי המילון ב-GitHub
-const HEBREW_DICT_URL = 'https://raw.githubusercontent.com/stain11111111/hebrew-dictionaries/main/hebrewDictionary.json';
-const COMMON_TYPOS_URL = 'https://raw.githubusercontent.com/stain11111111/hebrew-dictionaries/main/commonTypos.json';
+const HEBREW_DICT_URL = 'https://raw.githubusercontent.com/stain11111111/Hebrew-Text-Corrector-New/main/hebrewDictionary.json';
+const COMMON_TYPOS_URL = 'https://raw.githubusercontent.com/stain11111111/Hebrew-Text-Corrector-New/main/commonTypos.json';
 
 let hebrewDictionary = new Set();
 let commonTypos = {};
@@ -19,7 +19,7 @@ const statusMessage = document.getElementById('statusMessage');
 document.addEventListener('DOMContentLoaded', async () => {
     // טעינת מילונים
     await loadDictionaries();
-    
+
     // בדיקת סטטוס שימושים (הוסר - נשאר כאן להערה בלבד)
     // updateTrialStatus(); 
 });
@@ -44,7 +44,7 @@ async function loadDictionaries() {
         showStatusMessage('המילונים נטענו בהצלחה!', 'success');
         console.log("Hebrew Dictionary Loaded. Size:", hebrewDictionary.size);
         console.log("Common Typos Loaded. Keys:", Object.keys(commonTypos).length);
-        
+
     } catch (error) {
         console.error("Failed to load dictionaries:", error);
         showStatusMessage(`שגיאה בטעינת המילונים: ${error.message}. אנא נסה שוב מאוחר יותר.`, 'error', 10000);
@@ -100,7 +100,7 @@ function fixText(text) {
     // שלב 1: תיקון פיסוק - טיפול ברווחים לפני/אחרי סימני פיסוק
     // מוודא שיש רווח אחרי פסיק, נקודה, נקודתיים, נקודה פסיק, סימן שאלה, סימן קריאה, ומונע רווח לפניהם.
     let fixedText = text.replace(/([.,:;?!])(?!\s|$)/g, '$1 ').replace(/\s+([.,:;?!])/g, '$1');
-    
+
     // מירכאות וגרשיים
     fixedText = fixedText.replace(/(\s|^)"(\S)/g, '$1" $2'); // רווח אחרי מירכאה פותחת
     fixedText = fixedText.replace(/(\S)"(\s|$)/g, '$1" $2'); // רווח לפני מירכאה סוגרת
@@ -158,7 +158,7 @@ function fixText(text) {
                     }
                 }
             } // <--- זה הסוגר המסולסל שחסר היה כאן! (שורה 156 אם סופרים מהתחלה של הפונקציה)
-            
+
             // אם נמצא תיקון רלוונטי
             if (bestMatch !== originalWord && minDistance <= 2) {
                 correctedWords.push(nonAlphaNumBefore + bestMatch + nonAlphaNumAfter);
@@ -177,14 +177,14 @@ function fixText(text) {
                          corrected: null
                      });
                 }
-                
+
             }
         }
     });
 
     // הרכבת הטקסט המתוקן מחדש
     const finalFixedText = correctedWords.join(''); // חיבור מחדש
-    
+
     return {
         fixedText: finalFixedText,
         changes: changes
@@ -229,10 +229,10 @@ fixButton.addEventListener('click', () => {
     }
 
     showStatusMessage('מתקן טקסט...', 'info');
-    
+
     // בצע את התיקון בפועל
     const { fixedText, changes } = fixText(originalInput);
-    
+
     // הצג את הטקסט המתוקן בתיבת הפלט
     outputText.innerHTML = ''; // נקה תוכן קודם
     // העבר את הטקסט המתוקן לשדה הנסתר לצורך העתקה/הורדה
@@ -269,7 +269,7 @@ fixButton.addEventListener('click', () => {
         });
     }
     summaryOutput.appendChild(ul);
-    
+
     showStatusMessage('הטקסט תוקן בהצלחה!', 'success');
 });
 
